@@ -103,7 +103,7 @@ class MapSampleState extends State<MapSample> {
   }
 
   Future<BitmapDescriptor> _createMarkerImageFromAsset(String assetName) async {
-    final ImageConfiguration imgConfig = ImageConfiguration(size: Size(16, 16));
+    final ImageConfiguration imgConfig = ImageConfiguration();
 
     return BitmapDescriptor.fromAssetImage(imgConfig, assetName);
   }
@@ -128,7 +128,7 @@ class MapSampleState extends State<MapSample> {
 
   List<LatLng> _createPoints() {
     final List<LatLng> points = <LatLng>[
-      LatLng(34.549552, 134.996050),
+      LatLng(34.549551, 134.996050),
       LatLng(34.547671, 134.999087),
       LatLng(34.546679, 134.998176),
       LatLng(34.547888, 134.996276),

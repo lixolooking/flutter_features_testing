@@ -32,12 +32,12 @@ class MapSample extends StatefulWidget {
 
 class MapSampleState extends State<MapSample> {
   GoogleMapController _controller;
-  List<Marker> markers = <Marker>[];
-  Map<PolylineId, Polyline> polylines = <PolylineId, Polyline>{};
+  List<Marker> _markers = <Marker>[];
+  Map<PolylineId, Polyline> _polylines = <PolylineId, Polyline>{};
 
-  static final CameraPosition _kGooglePlex = CameraPosition(
-    target: LatLng(50.555395, 30.493153),
-    zoom: 17,
+  static final CameraPosition _startCameraPosition = CameraPosition(
+    target: LatLng(34.547881, 134.997071),
+    zoom: 16,
   );
 
   static final CameraPosition _kLake = CameraPosition(
@@ -46,43 +46,71 @@ class MapSampleState extends State<MapSample> {
       tilt: 59.440717697143555,
       zoom: 19.151926040649414);
 
+  @override
+  Widget build(BuildContext context) {
+    _addMarkers();
+    _addPolylines();
+
+    return new Scaffold(
+      body: GoogleMap(
+        mapType: MapType.hybrid,
+        initialCameraPosition: _startCameraPosition,
+        onMapCreated: _onMapCreated,
+        markers: Set<Marker>.of(_markers),
+        polylines: Set<Polyline>.of(_polylines.values),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _goToTheLake,
+        label: Text('To the lake!'),
+        icon: Icon(Icons.directions_boat),
+      ),
+    );
+  }
+
   void _onMapCreated(GoogleMapController controller) {
     _controller = controller;
   }
 
-  void _addMarkers() {
-    final String markerIdVal1 = 'marker_id_1';
-    final String markerIdVal2 = 'marker_id_2';
+  Future<void> _addMarkers() async {
+    List<Marker> markers = <Marker>[];
+    List<LatLng> points = _createPoints();
 
-    final MarkerId markerId1 = MarkerId(markerIdVal1);
-    final MarkerId markerId2 = MarkerId(markerIdVal2);
+    for (int i = 0; i < points.length; i++) {
+      final MarkerId markerId = MarkerId('marker_id_${i + 1}');
 
-    final Marker marker1 = Marker(
-      markerId: markerId1,
-      position: LatLng(50.555395, 30.493153),
-      infoWindow: InfoWindow(
-          title: markerIdVal1, snippet: '*'),
-      onTap: () {},
-    );
+      BitmapDescriptor numIcon;
+      await _createMarkerImageFromAsset('assets/icons/nums/marker_${i+1}.png')
+          .then((value) {
+            numIcon = value;
+          });
 
-    final Marker marker2 = Marker(
-      markerId: markerId2,
-      position: LatLng(50.555105, 30.493185),
-      infoWindow: InfoWindow(
-          title: markerIdVal2, snippet: '*'),
-      onTap: () {},
-    );
+      final Marker marker = Marker(
+        markerId: markerId,
+        position: points[i],
+        infoWindow: InfoWindow(
+            title: 'marker_${i + 1}', snippet: '*'),
+        icon: numIcon,
+        //icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+        onTap: () {},
+      );
+
+      markers.add(marker);
+    }
 
     setState(() {
-      markers.add(marker1);
-      markers.add(marker2);
+      _markers.addAll(markers);
     });
+  }
+
+  Future<BitmapDescriptor> _createMarkerImageFromAsset(String assetName) async {
+    final ImageConfiguration imgConfig = ImageConfiguration(size: Size(16, 16));
+
+    return BitmapDescriptor.fromAssetImage(imgConfig, assetName);
   }
 
   void _addPolylines() {
     final String polylineIdVal1 = 'polilyne_id_1';
-
-    final PolylineId polylineId1 = PolylineId(polylineIdVal1);
+    final PolylineId polylineId1 = PolylineId('polilyne_id_1');
 
     final Polyline polyline1 = Polyline(
       polylineId: polylineId1,
@@ -94,40 +122,23 @@ class MapSampleState extends State<MapSample> {
     );
 
     setState(() {
-      polylines[polylineId1] = polyline1;
+      _polylines[polylineId1] = polyline1;
     });
   }
 
   List<LatLng> _createPoints() {
-    final List<LatLng> points = <LatLng>[];
-    points.add(LatLng(50.555395, 30.493153));
-    points.add(LatLng(50.555105, 30.493185));
+    final List<LatLng> points = <LatLng>[
+      LatLng(34.549552, 134.996050),
+      LatLng(34.547671, 134.999087),
+      LatLng(34.546679, 134.998176),
+      LatLng(34.547888, 134.996276),
+      LatLng(34.548428, 134.996758),
+    ];
     return points;
   }
 
   Future<void> _goToTheLake() async {
     final GoogleMapController controller = _controller;
     await controller.animateCamera(CameraUpdate.newCameraPosition(_kLake));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    _addMarkers();
-    _addPolylines();
-
-    return new Scaffold(
-      body: GoogleMap(
-        mapType: MapType.normal,
-        initialCameraPosition: _kGooglePlex,
-        onMapCreated: _onMapCreated,
-        markers: Set<Marker>.of(markers),
-        polylines: Set<Polyline>.of(polylines.values),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _goToTheLake,
-        label: Text('To the lake!'),
-        icon: Icon(Icons.directions_boat),
-      ),
-    );
   }
 }

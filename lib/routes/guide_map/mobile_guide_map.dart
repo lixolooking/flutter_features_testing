@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'player_widget.dart';
 
 class GuideMapState extends State<GuideMap> {
 
@@ -15,7 +16,18 @@ class GuideMapState extends State<GuideMap> {
           onPressed:() => Navigator.of(context).pop(),
         ),
       ),
-      body: MapSample()
+      body: Column(
+        children: <Widget>[
+          Expanded(
+            flex: 7,
+            child: MapSample(),
+          ),
+          Expanded(
+            flex: 3,
+            child: PlayerWidget(),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -109,7 +121,6 @@ class MapSampleState extends State<MapSample> {
   }
 
   void _addPolylines() {
-    final String polylineIdVal1 = 'polilyne_id_1';
     final PolylineId polylineId1 = PolylineId('polilyne_id_1');
 
     final Polyline polyline1 = Polyline(

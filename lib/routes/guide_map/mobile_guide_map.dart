@@ -65,7 +65,7 @@ class MapSampleState extends State<MapSample> {
 
     return new Scaffold(
       body: GoogleMap(
-        mapType: MapType.hybrid,
+        mapType: MapType.normal,
         initialCameraPosition: _startCameraPosition,
         onMapCreated: _onMapCreated,
         markers: Set<Marker>.of(_markers),

@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:geolocator/geolocator.dart';
+
 import 'player_widget.dart';
 
 class GuideMapState extends State<GuideMap> {
@@ -44,6 +46,11 @@ class MapSample extends StatefulWidget {
 
 class MapSampleState extends State<MapSample> {
   GoogleMapController _controller;
+  Geolocator _geolocator;
+  Position _currentPosition;
+
+  // StreamSubscription<Position> _positionStream;
+
   List<Marker> _markers = <Marker>[];
   Map<PolylineId, Polyline> _polylines = <PolylineId, Polyline>{};
 
@@ -59,6 +66,30 @@ class MapSampleState extends State<MapSample> {
       zoom: 19.151926040649414);
 
   @override
+  void initState() {
+    super.initState();
+    initGelocator();
+  }
+
+  // @override
+  // void dispose() {
+  //   if (_positionStream != null) {
+  //     _positionStream.cancel();
+  //   }
+  //   super.dispose();
+  // }
+
+  void initGelocator() {
+    _geolocator = new Geolocator();
+    // var locationOptions = LocationOptions(accuracy: LocationAccuracy.best, distanceFilter: 5);
+
+    // _positionStream = _geolocator.getPositionStream(locationOptions).listen(
+    // (Position position) {
+    //     _currentPosition = position;
+    // });
+  }
+
+  @override
   Widget build(BuildContext context) {
     _addMarkers();
     _addPolylines();
@@ -70,12 +101,18 @@ class MapSampleState extends State<MapSample> {
         onMapCreated: _onMapCreated,
         markers: Set<Marker>.of(_markers),
         polylines: Set<Polyline>.of(_polylines.values),
+        myLocationEnabled: true,
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: _goToTheLake,
-        label: Text('To the lake!'),
-        icon: Icon(Icons.directions_boat),
+        onPressed: _goToMyPosition,
+        icon: Icon(Icons.accessibility_new),
+        label: Text(''),
       ),
+//      floatingActionButton: FloatingActionButton.extended(
+//        onPressed: _goToTheLake,
+//        label: Text('To the lake!'),
+//        icon: Icon(Icons.directions_boat),
+//      ),
     );
   }
 
@@ -150,6 +187,15 @@ class MapSampleState extends State<MapSample> {
 
   Future<void> _goToTheLake() async {
     final GoogleMapController controller = _controller;
-    await controller.animateCamera(CameraUpdate.newCameraPosition(_kLake));
+    await controller.animateCamera(CameraUpdate.newCameraPosition(_startCameraPosition));
+  }
+
+  Future<void> _goToMyPosition() async {
+    _currentPosition = await _geolocator.getCurrentPosition();
+    final CameraPosition currentCameraPosition = CameraPosition(
+      target: LatLng(_currentPosition.latitude, _currentPosition.longitude),
+      zoom: 16,
+    );
+    await _controller.animateCamera(CameraUpdate.newCameraPosition(currentCameraPosition));
   }
 }
